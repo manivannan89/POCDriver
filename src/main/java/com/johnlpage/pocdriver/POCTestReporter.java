@@ -100,8 +100,7 @@ public class POCTestReporter implements Runnable {
             
         }
         if (outfile != null) {
-            outfile.println();
-            outfile.println();
+            outfile.println();            
             outfile.close();
         }
         System.out.println();
