@@ -57,9 +57,7 @@ public class POCTestReporter implements Runnable {
                 testResults.GetSecondsElapsed(), DF_TIME.format(todaysdate), insertsDone, testResults.initialCount + insertsDone);
 
         if (outfile != null) {
-            String str = DF_FULL.format(todaysdate);
-            String mydate = str.replaceAll("\\s+", "T");
-            outfile.format("%s,%d,%d", mydate, testResults.GetSecondsElapsed(), insertsDone);
+            outfile.format("%d,%d", testResults.GetSecondsElapsed(), insertsDone);
         }
 
         HashMap<String, Long> results = testResults
@@ -71,7 +69,9 @@ public class POCTestReporter implements Runnable {
                     results.get(o), o);
 
             if (outfile != null) {
-                outfile.format(",%s,%d", o, results.get(o));
+                String str = DF_FULL.format(todaysdate);
+                String mydate = str.replaceAll("\\s+", "T");
+                outfile.format(",%s,%s,%d", o, mydate, results.get(o));
             }
 
             Long opsDone = testResults.GetOpsDone(o);
@@ -100,6 +100,7 @@ public class POCTestReporter implements Runnable {
             
         }
         if (outfile != null) {
+            outfile.println();
             outfile.println();
             outfile.close();
         }
