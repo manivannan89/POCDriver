@@ -167,7 +167,7 @@ public class MongoWorker implements Runnable {
         // id
         sequence = getHighestID();
 
-        ReviewShards();
+        // ReviewShards();
         rng = new Random();
         if (testOpts.zipfian) {
             zipfian = true;
@@ -550,9 +550,9 @@ public class MongoWorker implements Runnable {
                         bulkWriter.clear();
                         bulkops = 0;
                         // Check and see if we need to rejig sharding
-                        if (numShards != testOpts.numShards) {
-                            ReviewShards();
-                        }
+                        // if (numShards != testOpts.numShards) {
+                        //     ReviewShards();
+                        // }
                     }
                 }
 
