@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
-
 public class POCTestReporter implements Runnable {
     private POCTestResults testResults;
     private MongoClient mongoClient;
@@ -30,8 +29,33 @@ public class POCTestReporter implements Runnable {
 
     }
 
+    public void createLogFile() {
+        PrintWriter outfile = null;
 
-    private void logData() {
+        if (testOpts.logfile != null) {
+
+            try {
+                outfile = new PrintWriter(new BufferedWriter(new FileWriter(testOpts.logfile, true)));
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+        String slowThresholds = "";
+
+        for (int i = 0; i < testOpts.slowThresholds.length; i++) {
+            slowThresholds = slowThresholds + testOpts.slowThresholds[i] + "ms,";
+        }
+
+        outfile.format("docs,ts,dps,%s", slowThresholds);
+
+        if (outfile != null) {
+            outfile.println();
+            outfile.close();
+        }
+    }
+
+    public void logData() {
         PrintWriter outfile = null;
 
         if (testOpts.logfile != null) {
@@ -54,53 +78,56 @@ public class POCTestReporter implements Runnable {
         }
         Date todaysdate = new Date();
         System.out.format("After %d seconds (%s), %,d new documents inserted - collection has %,d in total \n",
-                testResults.GetSecondsElapsed(), DF_TIME.format(todaysdate), insertsDone, testResults.initialCount + insertsDone);
+                testResults.GetSecondsElapsed(), DF_TIME.format(todaysdate), insertsDone,
+                testResults.initialCount + insertsDone);
 
         if (outfile != null) {
-            outfile.format("%d,%d", testResults.GetSecondsElapsed(), insertsDone);
+            outfile.format("%d", insertsDone);
         }
 
-        HashMap<String, Long> results = testResults
-                .GetOpsPerSecondLastInterval();
+        HashMap<String, Long> results = testResults.GetOpsPerSecondLastInterval();
         String[] opTypes = POCTestResults.opTypes;
 
         for (String o : opTypes) {
-            System.out.format("%d %s per second since last report ",
-                    results.get(o), o);
+            System.out.format("%d %s per second since last report ", results.get(o), o);
 
-            if (outfile != null) {
-                String str = DF_FULL.format(todaysdate);
-                String mydate = str.replaceAll("\\s+", "T");
-                outfile.format(",%s,%s,%d", o, mydate, results.get(o));
+            if (o.equals("inserts")) {
+                if (outfile != null) {
+                    String str = DF_FULL.format(todaysdate);
+                    String mydate = str.replaceAll("\\s+", "T");
+                    outfile.format(",%s,%d", mydate, results.get(o));
+                }
             }
 
             Long opsDone = testResults.GetOpsDone(o);
 
-            for(int i=0;i< testOpts.slowThresholds.length;i++){
-                int slowThreshold  =  testOpts.slowThresholds[i];
+            for (int i = 0; i < testOpts.slowThresholds.length; i++) {
+                int slowThreshold = testOpts.slowThresholds[i];
                 if (opsDone > 0) {
-                    Double fastops = 100 - (testResults.GetSlowOps(o, i) * 100.0)
-                            / opsDone;
+                    Double fastops = 100 - (testResults.GetSlowOps(o, i) * 100.0) / opsDone;
                     System.out.println();
-                    System.out.format("\t%.2f %% in under %d milliseconds", fastops,
-                            slowThreshold);
-                    if (outfile != null) {
-                        outfile.format(",%.2f", fastops);
+                    System.out.format("\t%.2f %% in under %d milliseconds", fastops, slowThreshold);
+                    if (o.equals("inserts")) {
+                        if (outfile != null) {
+                            outfile.format(",%.2f", fastops);
+                        }
                     }
                 } else {
                     System.out.println();
                     System.out.format("\t%.2f %% in under %d milliseconds", (float) 100, slowThreshold);
-                    if (outfile != null) {
-                        outfile.format(",%d", 100);
+                    if (o.equals("inserts")) {
+                        if (outfile != null) {
+                            outfile.format(",%d", 100);
+                        }
                     }
                 }
-                
-            }                        
+
+            }
             System.out.println();
-            
+
         }
         if (outfile != null) {
-            outfile.println();            
+            outfile.println();
             outfile.close();
         }
         System.out.println();
@@ -122,8 +149,8 @@ public class POCTestReporter implements Runnable {
         Long secondsElapsed = testResults.GetSecondsElapsed();
 
         System.out.println("------------------------");
-        System.out.format("After %d seconds, %d new documents inserted - collection has %d in total \n",
-                secondsElapsed, insertsDone, testResults.initialCount + insertsDone);
+        // System.out.format("After %d seconds, %d new documents inserted - collection has %d in total \n", secondsElapsed,
+        //         insertsDone, testResults.initialCount + insertsDone);
 
         String[] opTypes = POCTestResults.opTypes;
 
@@ -131,7 +158,7 @@ public class POCTestReporter implements Runnable {
 
             Long opsDone = testResults.GetOpsDone(o);
 
-            System.out.format("%d %s per second on average", (int)(1f * opsDone / secondsElapsed), o);
+            System.out.format("%d %s per second on average", (int) (1f * opsDone / secondsElapsed), o);
             System.out.println();
 
         }

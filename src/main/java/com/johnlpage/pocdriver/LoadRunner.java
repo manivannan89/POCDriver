@@ -127,6 +127,7 @@ public class LoadRunner {
         // Report on progress by looking at testResults
         POCTestReporter reporter = new POCTestReporter(testResults, mongoClient, testOpts);
        
+        reporter.createLogFile();
 
         // Using a thread pool we keep filled
         ExecutorService testexec = Executors
@@ -165,6 +166,8 @@ public class LoadRunner {
         }
 
         // do final report
+        reporter.logData();
+
         reporter.finalReport();
     }
 
