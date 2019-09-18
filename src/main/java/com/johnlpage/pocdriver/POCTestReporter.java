@@ -47,7 +47,7 @@ public class POCTestReporter implements Runnable {
             slowThresholds = slowThresholds + testOpts.slowThresholds[i] + "ms,";
         }
 
-        outfile.format("docs,ts,dps,%s", slowThresholds);
+        outfile.format("fname,docs,ts,dps,%s", slowThresholds);
 
         if (outfile != null) {
             outfile.println();
@@ -82,7 +82,7 @@ public class POCTestReporter implements Runnable {
                 testResults.initialCount + insertsDone);
 
         if (outfile != null) {
-            outfile.format("%d", insertsDone);
+            outfile.format("%s,%d", testOpts.logfile, insertsDone);
         }
 
         HashMap<String, Long> results = testResults.GetOpsPerSecondLastInterval();
@@ -149,8 +149,9 @@ public class POCTestReporter implements Runnable {
         Long secondsElapsed = testResults.GetSecondsElapsed();
 
         System.out.println("------------------------");
-        // System.out.format("After %d seconds, %d new documents inserted - collection has %d in total \n", secondsElapsed,
-        //         insertsDone, testResults.initialCount + insertsDone);
+        // System.out.format("After %d seconds, %d new documents inserted - collection
+        // has %d in total \n", secondsElapsed,
+        // insertsDone, testResults.initialCount + insertsDone);
 
         String[] opTypes = POCTestResults.opTypes;
 
